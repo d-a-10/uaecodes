@@ -1,0 +1,19 @@
+body {
+  text-align: center;
+  background-color: #f0f0f0;
+  font-family: Arial, sans-serif;
+}
+
+#game-container {
+  margin: 0 auto;
+  display: inline-block;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+h1 {
+  margin-top: 20px;
+}
