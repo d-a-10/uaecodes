@@ -15,40 +15,42 @@ function preload() {
 }
 
 function setup() {
-  let canvas = createCanvas(360, 640);
-  canvas.parent('game-container');
+  createCanvas(360, 640);
   bird = new Bird();
   pipes.push(new Pipe());
 }
 
 function draw() {
-  background(bgImg);
+  if (!bgImg) {
+    background(135, 206, 235); // Fallback background
+  } else {
+    background(bgImg); // Use background image if loaded
+  }
 
-  // Draw and update pipes
   for (let i = pipes.length - 1; i >= 0; i--) {
     pipes[i].show();
     pipes[i].update();
-
+    
     if (pipes[i].hits(bird)) {
+      console.log("Game Over");
       gameOver = true;
-      noLoop(); // Stop the game
+      noLoop();
+      displayFinalScore(); // Display final score
     }
 
     if (pipes[i].offscreen()) {
       pipes.splice(i, 1);
-      score++;
     }
   }
 
   bird.update();
   bird.show();
 
-  // Add new pipes
-  if (frameCount % 100 === 0) {
+  if (frameCount % 100 == 0 && !gameOver) {
     pipes.push(new Pipe());
+    score++; // Increment score when a pipe passes
   }
 
-  // Display score
   fill(255);
   textSize(32);
   text('Score: ' + score, 10, 35);
@@ -58,17 +60,13 @@ function draw() {
     textAlign(CENTER);
     fill(255, 0, 0);
     text("GAME OVER", width / 2, height / 2);
-
-    textSize(32);
-    text("Final Score: " + score, width / 2, height / 2 + 50);
-    text("Press SPACE to reset", width / 2, height / 2 + 100);
   }
 }
 
 function keyPressed() {
-  if (key === ' ' && !gameOver) {
+  if (key == ' ' && !gameOver) {
     bird.up();
-  } else if (key === ' ' && gameOver) {
+  } else if (key == ' ' && gameOver) {
     resetGame();
   }
 }
@@ -81,7 +79,12 @@ class Bird {
   }
 
   show() {
-    image(birdImg, this.x, this.y, 34, 24);
+    if (birdImg) {
+      image(birdImg, this.x, this.y, 34, 24);
+    } else {
+      fill(255, 204, 0);
+      ellipse(this.x, this.y, this.r * 2);
+    }
   }
 
   up() {
@@ -133,8 +136,14 @@ class Pipe {
   }
 
   show() {
-    image(topPipeImg, this.x, 0, this.w, this.top);
-    image(bottomPipeImg, this.x, height - this.bottom, this.w, this.bottom);
+    if (topPipeImg && bottomPipeImg) {
+      image(topPipeImg, this.x, 0, this.w, this.top);
+      image(bottomPipeImg, this.x, height - this.bottom, this.w, this.bottom);
+    } else {
+      fill(34, 139, 34);
+      rect(this.x, 0, this.w, this.top);
+      rect(this.x, height - this.bottom, this.w, this.bottom);
+    }
   }
 }
 
@@ -145,4 +154,9 @@ function resetGame() {
   score = 0;
   pipes.push(new Pipe());
   loop();
+}
+
+function displayFinalScore() {
+  document.getElementById('final-score').innerHTML = 'Final Score: ' + score;
+  document.getElementById('restart-button').style.display = 'block';
 }
